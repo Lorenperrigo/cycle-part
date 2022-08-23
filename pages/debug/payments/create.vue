@@ -42,6 +42,11 @@
             label="VerificationFailureUrl"
           />
 
+          <v-text-field v-model="formData.verificationSuccessUrl" label="VerificationSuccessUrl" />
+
+          <v-text-field v-model="formData.verificationFailureUrl" label="VerificationFailureUrl" />
+
+
           <v-text-field
             v-model="formData.description"
             hint="Payment Description"
@@ -123,6 +128,8 @@ export default class CreatePaymentClass extends Vue {
     amount: '0.00',
     autoCapture: true,
     cvv: '',
+    verificationSuccessUrl: '',
+    verificationFailureUrl: '',
     description: '',
     channel: '',
     verificationSuccessUrl: '',
@@ -132,7 +139,7 @@ export default class CreatePaymentClass extends Vue {
   }
 
   verificationMethods = ['none', 'cvv', 'three_d_secure']
-  sourceType = ['card', 'ach', 'payment_token']
+
   required = [(v: string) => !!v || 'Field is required']
   error = {}
   loading = false

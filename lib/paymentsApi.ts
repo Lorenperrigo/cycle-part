@@ -9,7 +9,6 @@ interface MetaData {
   sessionId: string
   ipAddress: string
 }
-
 export interface BasePaymentPayload {
   idempotencyKey: string
   amount: {
