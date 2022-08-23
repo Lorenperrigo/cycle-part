@@ -55,6 +55,13 @@
               />
 
               <v-text-field
+                v-model="formData.channel"
+                hint="Channel"
+                label="Channel"
+                :disabled="loading"
+              />
+
+              <v-text-field
                 v-model="formData.phoneNumber"
                 hint="Phone number of the user in E.164 format"
                 label="Phone"
@@ -94,13 +101,9 @@
             width="500"
           >
             <v-btn icon class="float-right" @click="createCardOverlay = false">
-              <v-icon>
-                mdi-close
-              </v-icon>
+              <v-icon> mdi-close </v-icon>
             </v-btn>
-            <h2 class="title">
-              Add card
-            </h2>
+            <h2 class="title">Add card</h2>
             <v-form>
               <v-text-field
                 v-model="cardIdInput"
@@ -117,12 +120,10 @@
               </v-btn>
             </v-form>
 
-            <p class="separator subtitle-2">
-              OR
-            </p>
+            <p class="separator subtitle-2">OR</p>
 
             <v-menu>
-              <template v-slot:activator="{ on }">
+              <template #activator="{ on }">
                 <v-btn
                   v-if="isSandbox"
                   class="mt-n8"
@@ -255,6 +256,7 @@ export default class CardFlowClass extends Vue {
     amount: '0.00',
     cvv: '',
     description: '',
+    channel: '',
     phoneNumber: '',
     email: '',
   }
@@ -342,6 +344,7 @@ export default class CardFlowClass extends Vue {
       description: this.formData.description,
       keyId: '',
       encryptedData: '',
+      channel: this.formData.channel,
       metadata: {
         phoneNumber: this.formData.phoneNumber,
         email: this.formData.email,

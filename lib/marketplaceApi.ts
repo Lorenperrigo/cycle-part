@@ -1,4 +1,4 @@
-import { get } from 'lodash'
+import get from 'lodash/get'
 import axios from 'axios'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -17,13 +17,6 @@ export interface MarketplaceInfo {
   walletId: string
 }
 
-export interface CreateMarketplaceCardPaymentPayload
-  extends BasePaymentPayload {
-  verification?: string
-  keyId?: string
-  encryptedData?: string
-}
-
 export interface BasePaymentPayload {
   idempotencyKey: string
   amount: {
@@ -35,8 +28,25 @@ export interface BasePaymentPayload {
     type: string
   }
   description: string
+  channel: string
   metadata: MetaData
   marketplaceInfo: MarketplaceInfo
+}
+
+export interface CreateMarketplaceCardPaymentPayload
+  extends BasePaymentPayload {
+  verification?: string
+  keyId?: string
+  encryptedData?: string
+  autoCapture?: boolean
+}
+
+export interface CapturePaymentPayload {
+  idempotencyKey: string
+  amount: {
+    amount: string
+    currency: string
+  }
 }
 
 export interface RefundPaymentPayload {
@@ -150,6 +160,15 @@ function getPaymentById(id: string) {
 }
 
 /**
+ * Capture a payment
+ * @param {String} id
+ */
+function capturePayment(id: string, payload: CapturePaymentPayload) {
+  const url = `/v1/payments/${id}/capture`
+  return instance.post(url, payload)
+}
+
+/**
  * Refund a payment
  * @param {String} id
  */
@@ -192,6 +211,7 @@ export default {
   getInstance,
   getPayments,
   getPaymentById,
+  capturePayment,
   refundPayment,
   cancelPayment,
   createPayment,

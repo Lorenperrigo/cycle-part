@@ -3,7 +3,7 @@ import colors from 'vuetify/es5/util/colors'
 require('dotenv').config()
 
 export default {
-  mode: 'spa',
+  ssr: false,
   server: {
     host: '0.0.0.0',
     port: 3011,
@@ -24,6 +24,13 @@ export default {
       },
     ],
     link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
+    script: [
+      {
+        src: 'https://pay.google.com/gp/p/js/pay.js',
+        async: true,
+        defer: true,
+      },
+    ],
   },
   /*
    ** Customize the progress-bar color
@@ -46,15 +53,19 @@ export default {
     '~/plugins/transfersApi',
     '~/plugins/addressesApi',
     '~/plugins/payoutsApi',
+    '~/plugins/paymentIntentsApi',
     '~/plugins/wiresApi',
+    '~/plugins/sepaApi',
     '~/plugins/achApi',
     '~/plugins/mocksApi',
     '~/plugins/businessAccount/addressesApi',
     '~/plugins/businessAccount/balancesApi',
     '~/plugins/businessAccount/bankAccountsApi',
+    '~/plugins/businessAccount/senAccountsApi',
     '~/plugins/businessAccount/depositsApi',
     '~/plugins/businessAccount/payoutsApi',
     '~/plugins/businessAccount/transfersApi',
+    '~/plugins/cryptoPaymentMetadataApi',
   ],
   /*
    ** Nuxt.js dev-modules
@@ -107,4 +118,18 @@ export default {
   env: {
     baseUrl: process.env.BASE_URL || 'https://api-sandbox.circle.com',
   },
+  serverMiddleware: [
+    {
+      path: '/api/applepay',
+      handler: '~/server-middleware/apiApplePay.ts',
+    },
+    {
+      path: '/.well-known',
+      handler: '~/server-middleware/domainVerification.ts',
+    },
+    {
+      path: '/api/googlepay',
+      handler: '~/server-middleware/apiGooglePay.ts',
+    },
+  ],
 }

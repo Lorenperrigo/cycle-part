@@ -28,7 +28,9 @@
     "types": [
       "@types/node",
       "@nuxt/types",
-      "@nuxtjs/vuetify"
+      "@nuxtjs/vuetify",
+      "@types/applepayjs",
+      "@types/googlepay"
     ]
   },
   "exclude": [

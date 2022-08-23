@@ -4,6 +4,10 @@
       <v-col cols="12" md="4">
         <v-form>
           <v-text-field v-model="formData.trackingRef" label="Tracking Ref" />
+          <v-text-field
+            v-model="formData.accountNumber"
+            label="Account Number"
+          />
           <v-text-field v-model="formData.amount" label="Amount" />
           <v-btn
             v-if="isSandbox"
@@ -39,7 +43,7 @@ import { mapGetters } from 'vuex'
 import { getLive } from '../../../../lib/apiTarget'
 import RequestInfo from '../../../../components/RequestInfo.vue'
 import ErrorSheet from '../../../../components/ErrorSheet.vue'
-import { CreateMockWirePaymentPayload } from '@/lib/mocksApi'
+import { CreateMockPushPaymentPayload } from '@/lib/mocksApi'
 @Component({
   components: {
     RequestInfo,
@@ -56,6 +60,7 @@ import { CreateMockWirePaymentPayload } from '@/lib/mocksApi'
 export default class CreateMockIncomingWireClass extends Vue {
   formData = {
     trackingRef: '',
+    accountNumber: '',
     amount: '0.00',
   }
 
@@ -75,8 +80,11 @@ export default class CreateMockIncomingWireClass extends Vue {
       amount: this.formData.amount,
       currency: 'USD',
     }
-    const payload: CreateMockWirePaymentPayload = {
+    const payload: CreateMockPushPaymentPayload = {
       trackingRef: this.formData.trackingRef,
+      beneficiaryBank: {
+        accountNumber: this.formData.accountNumber,
+      },
       amount: amountDetail,
     }
 

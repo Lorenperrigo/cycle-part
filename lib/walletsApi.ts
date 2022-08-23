@@ -1,5 +1,6 @@
-import { get } from 'lodash'
+import get from 'lodash/get'
 import axios from 'axios'
+import { v4 as uuidv4 } from 'uuid'
 
 import { getAPIHostname } from './apiTarget'
 
@@ -102,10 +103,30 @@ function getMasterWallet() {
   return instance.get(url)
 }
 
+/**
+ * Convert digital wallets token
+ * @param {String} type
+ * @param {Object} tokenData
+ * @param {UUID} idempotencyKey
+ */
+function convertToken(type: string, tokenData: Object) {
+  const url = '/v1/paymentTokens'
+  const payload = {
+    type,
+    tokenData,
+    idempotencyKey: uuidv4(),
+  }
+  const config = {
+    headers: { 'Access-Control-Allow-Origin': '*' },
+  }
+  return instance.post(url, payload, config)
+}
+
 export default {
   getInstance,
   getWallets,
   getWalletById,
   createWallet,
   getMasterWallet,
+  convertToken,
 }

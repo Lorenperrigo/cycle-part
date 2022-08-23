@@ -1,10 +1,13 @@
-import { get } from 'lodash'
+import get from 'lodash/get'
 import axios from 'axios'
 
 import { getAPIHostname } from './apiTarget'
 
-export interface CreateMockWirePaymentPayload {
+export interface CreateMockPushPaymentPayload {
   trackingRef: string
+  beneficiaryBank: {
+    accountNumber: string
+  }
   amount: {
     amount: string
     currency: string
@@ -61,8 +64,26 @@ function getInstance() {
  * Trigger arrival of an incoming wire
  * @param {*} payload
  */
-function createMockWirePayment(payload: CreateMockWirePaymentPayload) {
+function createMockWirePayment(payload: CreateMockPushPaymentPayload) {
   const url = '/v1/mocks/payments/wire'
+  return instance.post(url, payload)
+}
+
+/**
+ * Trigger a mock sen payment
+ * @param {*} payload
+ */
+function createMockSenPayment(payload: CreateMockPushPaymentPayload) {
+  const url = '/v1/mocks/payments/sen'
+  return instance.post(url, payload)
+}
+
+/**
+ * Trigger a mock sepa payment
+ * @param {*} payload
+ */
+function createMockSEPAPayment(payload: CreateMockPushPaymentPayload) {
+  const url = '/v1/mocks/payments/sepa'
   return instance.post(url, payload)
 }
 
@@ -87,6 +108,8 @@ function createMockACHBankAccount(payload: CreateMockACHBankAccount) {
 export default {
   getInstance,
   createMockWirePayment,
+  createMockSenPayment,
+  createMockSEPAPayment,
   createMockChargeback,
   createMockACHBankAccount,
 }

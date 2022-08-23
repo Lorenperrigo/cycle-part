@@ -11,6 +11,12 @@
           />
           <v-text-field v-model="formData.amount" label="Amount" />
 
+          <v-checkbox
+            v-if="formData.sourceType != 'ach'"
+            v-model="formData.autoCapture"
+            label="Auto capture"
+          />
+
           <v-select
             v-if="formData.sourceType == 'card'"
             v-model="formData.verification"
@@ -18,7 +24,23 @@
             label="Verification Method"
           />
 
-          <v-text-field v-if="cvvRequired" v-model="formData.cvv" label="CVV" />
+          <v-text-field
+            v-if="showCvv"
+            v-model="formData.cvv"
+            :label="`${cvvLabel}`"
+          />
+
+          <v-text-field
+            v-if="formData.sourceType != 'payment_token'"
+            v-model="formData.verificationSuccessUrl"
+            label="VerificationSuccessUrl"
+          />
+
+          <v-text-field
+            v-if="formData.sourceType != 'payment_token'"
+            v-model="formData.verificationFailureUrl"
+            label="VerificationFailureUrl"
+          />
 
           <v-text-field v-model="formData.verificationSuccessUrl" label="VerificationSuccessUrl" />
 
@@ -29,6 +51,12 @@
             v-model="formData.description"
             hint="Payment Description"
             label="Description"
+          />
+
+          <v-text-field
+            v-model="formData.channel"
+            hint="Channel"
+            label="Channel"
           />
 
           <v-text-field
@@ -91,22 +119,27 @@ import ErrorSheet from '@/components/ErrorSheet.vue'
 })
 export default class CreatePaymentClass extends Vue {
   isMarketplace!: boolean
-  cvvRequired = true
+  showCvv = true
+  cvvLabel = 'CVV'
   formData = {
     sourceId: '',
     sourceType: 'card', // Default to card
     verification: 'cvv',
     amount: '0.00',
+    autoCapture: true,
     cvv: '',
     verificationSuccessUrl: '',
     verificationFailureUrl: '',
     description: '',
+    channel: '',
+    verificationSuccessUrl: '',
+    verificationFailureUrl: '',
     phoneNumber: '',
     email: '',
   }
 
   verificationMethods = ['none', 'cvv', 'three_d_secure']
-  sourceType = ['card', 'ach']
+
   required = [(v: string) => !!v || 'Field is required']
   error = {}
   loading = false
@@ -124,10 +157,15 @@ export default class CreatePaymentClass extends Vue {
   @Watch('formData.verification', { immediate: true })
   onChildChanged(val: string) {
     if (val === 'none') {
-      this.cvvRequired = false
+      this.showCvv = false
     }
     if (val === 'cvv') {
-      this.cvvRequired = true
+      this.showCvv = true
+      this.cvvLabel = 'CVV'
+    }
+    if (val === 'three_d_secure') {
+      this.showCvv = true
+      this.cvvLabel = 'CVV (Optional)'
     }
   }
 
@@ -135,8 +173,7 @@ export default class CreatePaymentClass extends Vue {
   onSourceTypeChanged(val: string) {
     if (val === 'card') {
       this.formData.verification = 'cvv'
-    }
-    if (val === 'ach') {
+    } else {
       this.formData.verification = 'none'
     }
   }
@@ -158,6 +195,7 @@ export default class CreatePaymentClass extends Vue {
     }
     const payload: CreateCardPaymentPayload = {
       idempotencyKey: uuidv4(),
+      autoCapture: this.formData.autoCapture,
       amount: amountDetail,
       source: sourceDetails,
       description: this.formData.description,
@@ -169,6 +207,7 @@ export default class CreatePaymentClass extends Vue {
         sessionId: 'xxx',
         ipAddress: '172.33.222.1',
       },
+      channel: this.formData.channel,
     }
 
     if (this.formData.sourceType === 'card') {
@@ -176,7 +215,11 @@ export default class CreatePaymentClass extends Vue {
     }
 
     try {
-      if (this.cvvRequired) {
+      if (
+        this.formData.verification === 'cvv' ||
+        (this.formData.verification === 'three_d_secure' &&
+          this.formData.cvv !== '')
+      ) {
         const { cvv } = this.formData
         const cardDetails = { cvv }
 

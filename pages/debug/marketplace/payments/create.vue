@@ -18,6 +18,12 @@
 
           <v-text-field v-model="formData.amount" label="Amount" />
 
+          <v-checkbox
+            v-if="formData.sourceType == 'card'"
+            v-model="formData.autoCapture"
+            label="Auto capture"
+          />
+
           <v-select
             v-if="formData.sourceType == 'card'"
             v-model="formData.verification"
@@ -31,6 +37,12 @@
             v-model="formData.description"
             hint="Payment Description"
             label="Description"
+          />
+
+          <v-text-field
+            v-model="formData.channel"
+            hint="Channel"
+            label="Channel"
           />
 
           <v-text-field
@@ -108,10 +120,12 @@ export default class CreatePaymentClass extends Vue {
   formData = {
     sourceId: '',
     sourceType: 'card', // Default to card
+    autoCapture: true,
     verification: 'cvv',
     amount: '0.00',
     cvv: '',
     description: '',
+    channel: '',
     phoneNumber: '',
     email: '',
   }
@@ -176,6 +190,7 @@ export default class CreatePaymentClass extends Vue {
 
     const payload: CreateMarketplaceCardPaymentPayload = {
       idempotencyKey: uuidv4(),
+      autoCapture: this.formData.autoCapture,
       amount: amountDetail,
       source: sourceDetails,
       description: this.formData.description,
@@ -186,6 +201,7 @@ export default class CreatePaymentClass extends Vue {
         ipAddress: '172.33.222.1',
       },
       marketplaceInfo: this.marketplaceInfo,
+      channel: this.formData.channel,
     }
 
     if (this.formData.sourceType === 'card') {

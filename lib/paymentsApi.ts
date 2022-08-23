@@ -1,4 +1,4 @@
-import { get } from 'lodash'
+import get from 'lodash/get'
 import axios from 'axios'
 
 import { getAPIHostname } from './apiTarget'
@@ -9,15 +9,6 @@ interface MetaData {
   sessionId: string
   ipAddress: string
 }
-
-export interface CreateCardPaymentPayload extends BasePaymentPayload {
-  verification?: string
-  verificationSuccessUrl?: string
-  verificationFailureUrl?: string
-  keyId?: string
-  encryptedData?: string
-}
-
 export interface BasePaymentPayload {
   idempotencyKey: string
   amount: {
@@ -29,7 +20,17 @@ export interface BasePaymentPayload {
     type: string
   }
   description: string
+  channel: string
   metadata: MetaData
+}
+
+export interface CreateCardPaymentPayload extends BasePaymentPayload {
+  verification?: string
+  autoCapture?: boolean
+  verificationSuccessUrl?: string
+  verificationFailureUrl?: string
+  keyId?: string
+  encryptedData?: string
 }
 
 export interface RefundPaymentPayload {
@@ -39,6 +40,14 @@ export interface RefundPaymentPayload {
     currency: string
   }
   reason: string | undefined
+}
+
+export interface CapturePaymentPayload {
+  idempotencyKey: string
+  amount: {
+    amount: string
+    currency: string
+  }
 }
 
 const instance = axios.create({
@@ -114,6 +123,7 @@ function createPayment(payload: BasePaymentPayload) {
 /**
  * Get payments
  * @param {String} settlementId
+ * @param {String} paymentIntentId
  * @param {String} from
  * @param {String} to
  * @param {String} pageBefore
@@ -122,6 +132,7 @@ function createPayment(payload: BasePaymentPayload) {
  */
 function getPayments(
   settlementId: string,
+  paymentIntentId: string,
   from: string,
   to: string,
   pageBefore: string,
@@ -130,6 +141,7 @@ function getPayments(
 ) {
   const queryParams = {
     settlementId: nullIfEmpty(settlementId),
+    paymentIntentId: nullIfEmpty(paymentIntentId),
     from: nullIfEmpty(from),
     to: nullIfEmpty(to),
     pageBefore: nullIfEmpty(pageBefore),
@@ -163,6 +175,15 @@ function refundPayment(id: string, payload: RefundPaymentPayload) {
 }
 
 /**
+ * Capture a payment
+ * @param {String} id
+ */
+function capturePayment(id: string, payload: CapturePaymentPayload) {
+  const url = `/v1/payments/${id}/capture`
+  return instance.post(url, payload)
+}
+
+/**
  * Get balance
  */
 function getBalance() {
@@ -172,6 +193,7 @@ function getBalance() {
 
 /**
  * Get reversals
+ * @param {String} status
  * @param {String} from
  * @param {String} to
  * @param {String} pageBefore
@@ -179,6 +201,7 @@ function getBalance() {
  * @param {String} pageSize
  */
 function getReversals(
+  status: string,
   from: string,
   to: string,
   pageBefore: string,
@@ -186,6 +209,7 @@ function getReversals(
   pageSize: string
 ) {
   const queryParams = {
+    status: nullIfEmpty(status),
     from: nullIfEmpty(from),
     to: nullIfEmpty(to),
     pageBefore: nullIfEmpty(pageBefore),
@@ -206,6 +230,7 @@ export default {
   getPaymentById,
   getPCIPublicKey,
   refundPayment,
+  capturePayment,
   getBalance,
   getReversals,
 }

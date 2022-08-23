@@ -11,7 +11,7 @@
               </v-list-item-title>
             </v-list-item-content>
             <v-menu v-if="!showPaymentStatus">
-              <template v-slot:activator="{ on }">
+              <template #activator="{ on }">
                 <v-btn
                   v-if="isSandbox"
                   class="mt-n8"
@@ -79,9 +79,14 @@
                 :disabled="loading"
               />
 
-              <div class="my-4 subtitle-1 black--text">
-                Billing Details
-              </div>
+              <v-text-field
+                v-model="formData.channel"
+                hint="Channel"
+                label="Channel"
+                :disabled="loading"
+              />
+
+              <div class="my-4 subtitle-1 black--text">Billing Details</div>
 
               <v-text-field
                 v-model="formData.cardData.name"
@@ -250,21 +255,7 @@ interface FormData {
     email: string
   }
   description: string
-}
-
-interface CreateChargePayload {
-  id: string
-  amount: {
-    amount: number
-    currency: string
-  }
-  verification: string
-  source: {
-    id: string
-    type: string
-  }
-  keyId: string
-  encryptedData: string
+  channel: string
 }
 
 @Component({
@@ -310,6 +301,7 @@ export default class ChargeFlowClass extends Vue {
       email: '',
     },
     description: '',
+    channel: '',
   }
 
   rules = {
@@ -445,6 +437,7 @@ export default class ChargeFlowClass extends Vue {
       verification: 'cvv',
       source: sourceDetails,
       description: this.formData.description,
+      channel: this.formData.channel,
       metadata: {
         phoneNumber: this.formData.cardData.phoneNumber,
         email: this.formData.cardData.email,
